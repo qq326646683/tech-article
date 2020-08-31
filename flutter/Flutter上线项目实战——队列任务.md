@@ -84,6 +84,20 @@ class TaskQueueUtil {
   }
 
 }
+
+
+class TaskInfo {
+  int id; // 任务唯一标识
+  String content;
+  StreamController<TaskInfo> controller;
+
+  TaskInfo(this.id, this.content, {this.controller});
+
+  @override
+  String toString() {
+    return 'TaskInfo{id: $id, content: $content, controller: $controller}';
+  }
+}
 ```
 
 ## 四、使用
@@ -96,14 +110,14 @@ main() {
     
     task(runTask);
     task(playTask);
-    task(playTask);
+    task(swimTask);
 }
 
 
 
 task1() async {
   TaskInfo taskInfo = await TaskQueueUtil.getInstance().addTask(runTask);
-  // debugPrint('task${taskInfo.id}-result:$taskInfo');
+  debugPrint('task${taskInfo.id}-result:$taskInfo');
 }
 
 

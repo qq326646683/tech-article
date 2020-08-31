@@ -11,8 +11,8 @@
 ## 2. 解决方案
 >解决思路：
 
-1. MaterialApp 的routes属性赋值路由数组，navigatorObservers属性赋值路由监听对象NavigatorManager。
-2. 在NavigatorManager里实现NavigatorObserver的didPush/didReplace/didPop/didRemove，并记录到路由栈
+1. MaterialApp 的routes属性赋值路由数组，navigatorObservers属性赋值路由监听对象NavigationUtil。
+2. 在NavigationUtil里实现NavigatorObserver的didPush/didReplace/didPop/didRemove，并记录到路由栈
 List<Route> _mRoutes中。
 3. 将实时记录的路由跳转，用stream发一个广播，哪里需要哪里注册。
 4. 用mixin实现当前页面获取、失去焦点，监听当前路由变化，触发onFocus,onBlur。
@@ -23,126 +23,130 @@ List<Route> _mRoutes中。
   
 ``` dart
 MaterialApp(
-    navigatorObservers: [NavigatorManager.getInstance()],
-    routes: NavigatorManager.configRoutes,
+    navigatorObservers: [NavigationUtil.getInstance()],
+    routes: NavigationUtil.configRoutes,
     ...
 )
 ```
->navigator_manager.dart
+>navigation_util.dart
   
 ``` dart
-class NavigatorManager extends NavigatorObserver {
-  /* 配置routes */
+class RouteInfo {
+  Route currentRoute;
+  List<Route> routes;
+
+  RouteInfo(this.currentRoute, this.routes);
+
+  @override
+  String toString() {
+    return 'RouteInfo{currentRoute: $currentRoute, routes: $routes}';
+  }
+}
+
+class NavigationUtil extends NavigatorObserver {
+  static NavigationUtil _instance;
+
   static Map<String, WidgetBuilder> configRoutes = {
-  PackageInfoPage.sName: (context) =>
-    SplashPage.sName: (context) => SplashPage(),
-    LoginPage.sName: (context) => SplashPage()),
-    MainPage.sName: (context) => SplashPage(),
-    //...
-  }
-  // 当前路由栈
-  static List<Route> _mRoutes;
-  List<Route> get routes => _mRoutes;
-  // 当前路由
-  Route get currentRoute => _mRoutes[_mRoutes.length - 1];
-  // stream相关
+    SplashPage.sName: (_) => SplashPage(),
+    ScanQrPage.sName: (_) => ScanQrPage(),
+  };
+
+  ///路由信息
+  RouteInfo _routeInfo;
+  RouteInfo get routeInfo => _routeInfo;
+  ///stream相关
   static StreamController _streamController;
-  StreamController get streamController=> _streamController;
-  // 用来路由跳转
-  static NavigatorState navigator;
-  
-  /* 单例给出NavigatorManager */
-  static NavigatorManager navigatorManager;
-  static NavigatorManager getInstance() {
-    if (navigatorManager == null) {
-      navigatorManager = new NavigatorManager();
-      _streamController = StreamController.broadcast();
+  StreamController<RouteInfo> get streamController=> _streamController;
+  ///用来路由跳转
+  static NavigatorState navigatorState;
+
+
+  static NavigationUtil getInstance() {
+    if (_instance == null) {
+      _instance = new NavigationUtil();
+      _streamController = StreamController<RouteInfo>.broadcast();
     }
-    return navigatorManager;
+    return _instance;
   }
-  
-  // replace 页面
-  pushReplacementNamed(String routeName, [WidgetBuilder builder]) {
-    return navigator.pushReplacement(
-      CupertinoPageRoute(
+
+  ///push页面
+  Future<T> pushNamed<T>(String routeName, {WidgetBuilder builder, bool fullscreenDialog}) {
+    return navigatorState.push<T>(
+      MaterialPageRoute(
         builder: builder ?? configRoutes[routeName],
         settings: RouteSettings(name: routeName),
+        fullscreenDialog: fullscreenDialog ?? false,
       ),
     );
   }
-  
-  // push 页面
-  pushNamed(String routeName, [WidgetBuilder builder]) {
-    return navigator.push(
-      CupertinoPageRoute(
+
+  ///replace页面
+  Future<T> pushReplacementNamed<T, R>(String routeName, {WidgetBuilder builder, bool fullscreenDialog}) {
+    return navigatorState.pushReplacement<T, R>(
+      MaterialPageRoute(
         builder: builder ?? configRoutes[routeName],
         settings: RouteSettings(name: routeName),
+        fullscreenDialog: fullscreenDialog ?? false,
       ),
     );
   }
-  
-  // pop 页面
-  pop<T extends Object>([T result]) {
-    navigator.pop(result);
+
+  /// pop 页面
+  pop<T>([T result]) {
+    navigatorState.pop<T>(result);
   }
-  
-  // push一个页面， 移除该页面下面所有页面
+
   pushNamedAndRemoveUntil(String newRouteName) {
-    return navigator.pushNamedAndRemoveUntil(newRouteName, (Route<dynamic> route) => false);
+    return navigatorState.pushNamedAndRemoveUntil(newRouteName, (Route<dynamic> route) => false);
   }
-  
-  // 当调用Navigator.push时回调
+
   @override
   void didPush(Route route, Route previousRoute) {
     super.didPush(route, previousRoute);
-    if (_mRoutes == null) {
-      _mRoutes = new List<Route>();
+    if (_routeInfo == null) {
+      _routeInfo = new RouteInfo(null, new List<Route>());
     }
-    // 这里过滤调push的是dialog的情况
+    ///这里过滤调push的是dialog的情况
     if (route is CupertinoPageRoute || route is MaterialPageRoute) {
-      _mRoutes.add(route);
+      _routeInfo.routes.add(route);
       routeObserver();
     }
   }
-  
-  // 当调用Navigator.replace时回调
+
   @override
   void didReplace({Route newRoute, Route oldRoute}) {
     super.didReplace();
     if (newRoute is CupertinoPageRoute || newRoute is MaterialPageRoute) {
-      _mRoutes.remove(oldRoute);
-      _mRoutes.add(newRoute);
+      _routeInfo.routes.remove(oldRoute);
+      _routeInfo.routes.add(newRoute);
       routeObserver();
     }
   }
-  
-  // 当调用Navigator.pop时回调
+
   @override
   void didPop(Route route, Route previousRoute) {
     super.didPop(route, previousRoute);
     if (route is CupertinoPageRoute || route is MaterialPageRoute) {
-      _mRoutes.remove(route);
+      _routeInfo.routes.remove(route);
       routeObserver();
     }
   }
-  
+
   @override
   void didRemove(Route removedRoute, Route oldRoute) {
     super.didRemove(removedRoute, oldRoute);
     if (removedRoute is CupertinoPageRoute || removedRoute is MaterialPageRoute) {
-      _mRoutes.remove(removedRoute);
+      _routeInfo.routes.remove(removedRoute);
       routeObserver();
     }
   }
-  
+
+
+
   void routeObserver() {
-    LogUtil.i(sName, '&&路由栈&&');
-    LogUtil.i(sName, _mRoutes);
-    LogUtil.i(sName, '&&当前路由&&');
-    LogUtil.i(sName, _mRoutes[_mRoutes.length - 1]);
-    // 当前页面的navigator，用来路由跳转
-    navigator = _mRoutes[_mRoutes.length - 1].navigator;
-    streamController.sink.add(_mRoutes);
+    _routeInfo.currentRoute = _routeInfo.routes.last;
+    navigatorState = _routeInfo.currentRoute.navigator;
+    _streamController.sink.add(_routeInfo);
   }
 }
 ```
@@ -203,7 +207,7 @@ mixin NavigationMixin<T extends StatefulWidget> on State<T> {
 case 401:
     ToastUtil.showRed('登录失效,请重新登陆');
     UserDao.clearAll();
-    NavigatorManager.getInstance().pushNamedAndRemoveUntil(LoginPage.sName);
+    NavigationUtil.getInstance().pushNamedAndRemoveUntil(LoginPage.sName);
     break;
 ```
 
@@ -211,17 +215,17 @@ case 401:
   
 ``` dart
 static jumpPage(String pageName, [WidgetBuilder builder]) {
-    String currentRouteName = NavigatorManager.getInstance().currentRoute.settings.name;
+    String currentRouteName = NavigationUtil.getInstance().currentRoute.settings.name;
     // 如果是未登录，不跳转
-    if (NavigatorManager.getInstance().routes[0].settings.name != MainPage.sName) {
+    if (NavigationUtil.getInstance().routes[0].settings.name != MainPage.sName) {
       return;
     }
 
     // 如果已经是当前页面就replace
     if (currentRouteName == pageName) {
-      NavigatorManager.getInstance().pushReplacementNamed(pageName, builder);
+      NavigationUtil.getInstance().pushReplacementNamed(pageName, builder);
     } else {
-      NavigatorManager.getInstance().pushNamed(pageName, builder);
+      NavigationUtil.getInstance().pushNamed(pageName, builder);
     }
 }
 ```
@@ -241,7 +245,7 @@ class StatusBarUtil {
       ];
       
       static init() {
-        NavigatorManager.getInstance().streamController.stream.listen((state) {
+        NavigationUtil.getInstance().streamController.stream.listen((state) {
             setupStatusBar(state[state.length - 1]);
         })
       }

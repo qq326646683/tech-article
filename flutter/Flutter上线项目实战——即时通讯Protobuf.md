@@ -45,7 +45,7 @@ message Message {
   string to = 3;
   string createAt = 4;
   string type = 5;
-  string body = 6;m
+  string body = 6;
 }
 
 // 收到聊天消息

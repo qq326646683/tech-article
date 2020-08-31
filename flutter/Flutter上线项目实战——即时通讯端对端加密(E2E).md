@@ -9,6 +9,8 @@
 
 ![image](http://file.jinxianyun.com/chate2e.jpg)
 
+###### [>> image link](http://file.jinxianyun.com/chate2e.jpg)
+
 > ### 3.流程代码
 
 1. 引入加解密库

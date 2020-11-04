@@ -37,18 +37,17 @@ Hero(
 ```dart
 // DemoSourceEntity is your data model
 // itemBuilder is gallery page item
-// heroTagBuilder accordding to gridview item's hero tag
 void _openGallery(DemoSourceEntity source) {
-    Navigator.of(context).push(
-      HeroDialogRoute<void>(
-        builder: (BuildContext context) => InteractiveviewerGallery<DemoSourceEntity>(
+  Navigator.of(context).push(
+    HeroDialogRoute<void>(
+      // DisplayGesture is just debug, please remove it when use
+      builder: (BuildContext context) => InteractiveviewerGallery<DemoSourceEntity>(
           sources: sourceList,
           initIndex: sourceList.indexOf(source),
           itemBuilder: itemBuilder,
-          heroTagBuilder: (int index) => sourceList[index].url,
-        ),
       ),
-    );
+    ),
+  );
 }
 ```
 
@@ -56,16 +55,15 @@ void _openGallery(DemoSourceEntity source) {
 
 ```dart
 Widget itemBuilder(BuildContext context, int index, bool isFocus) {
-    DemoSourceEntity sourceEntity = sourceList[index];
-    if (sourceEntity.type == 'video') {
-      return DemoVideoItem(
-        sourceEntity.url,
-        sourceEntity.previewUrl,
-        isFocus: isFocus,
-      );
-    } else {
-      return DemoImageItem(sourceEntity.url);
-    }
+  DemoSourceEntity sourceEntity = sourceList[index];
+  if (sourceEntity.type == 'video') {
+    return DemoVideoItem(
+      sourceEntity,
+      isFocus: isFocus,
+    );
+  } else {
+    return DemoImageItem(sourceEntity);
+  }
 }
 ```
 

@@ -1,6 +1,8 @@
 # 例子 1、
 #### 现有一个滑动聊天页面出现/隐藏jump按钮的需求:
+
 ![image](http://file.jinxianyun.com/flutter_optimize1.gif)
+[image](http://file.jinxianyun.com/flutter_optimize1.gif)
 
 
 > 1. 优化前：ListView外层setState实现:
@@ -74,6 +76,7 @@ class _JumpButtonState extends State<JumpButton> {
 > 3. 开启 DevTools 的 Repaint RainBow差别:
 
 ![image](http://file.jinxianyun.com/flutter_optimize2.gif)
+[image](http://file.jinxianyun.com/flutter_optimize2.gif)
 
 ###### 左边是优化前: 发现在滑动过程中，ListView在不断的绘制，右边为优化后，在按钮出现的时候绘制一次
 
@@ -154,6 +157,7 @@ class _MMarqueeWidgetState extends State<MMarqueeWidget> with SingleTickerProvid
 > 2. 开启 DevTools 的 Repaint RainBow
 
 ![image](http://file.jinxianyun.com/flutter_optimize3.gif)
+[image](http://file.jinxianyun.com/flutter_optimize3.gif)
 
 ###### 发现跑马灯动画会导致其他部分也重绘
 

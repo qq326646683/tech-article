@@ -2,12 +2,16 @@
 1. FFmpeg负责解码
 2. GLES+GLSurfaceView负责渲染
 ### 二、播放器实现流程图
-> #### 1. FFmpeg解码流程:
+> #### 1.总流程
+![image](http://file.jinxianyun.com/ffmpeg_opengles.png)
+[image](http://file.jinxianyun.com/ffmpeg_opengles.png)
+
+> #### 2. FFmpeg解码流程:
 
 ![](http://file.jinxianyun.com/ffmpeg_decoder.png)
 [by 雷霄骅](https://blog.csdn.net/leixiaohua1020/article/details/50534150?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522161950611716780261974067%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=161950611716780261974067&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v2~rank_v29-3-50534150.nonecase&utm_term=%E9%9F%B3%E8%A7%86%E9%A2%91%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B)
 
-> #### 2. FFmpeg解码具体流程:
+> #### 3. FFmpeg解码具体流程:
 1. 创建封装格式上下文
 2. 打开输入文件，解封装
 3. 获取音视频流信息
@@ -19,7 +23,7 @@
 9. 创建存储编码数据和解码数据的结构体
 10. 解码循环
 
-> #### 3. 渲染流程
+> #### 4. 渲染流程
 1. 将解码后的帧数据加载到内存
 2. 取帧数据用GLES实现GLSurface.Renderer的onSurfaceCreated/onSurfaceChanged/onDrawFrame
 3. Android JNI调准备好的方法

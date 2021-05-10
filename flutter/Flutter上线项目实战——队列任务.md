@@ -16,39 +16,47 @@
 
 ## 三、具体实现
 
-> TaskQueueUtil.dart
+> QueueUtil.dart
 
 ```dart
-class TaskQueueUtil {
-  static TaskQueueUtil _instance;
+class QueueUtil {
+  /// 用map key存储多个QueueUtil单例,目的是隔离多个类型队列任务互不干扰
+  /// Use map key to store multiple QueueUtil singletons, the purpose is to isolate multiple types of queue tasks without interfering with each other
+  static Map<String, QueueUtil> _instance = Map<String, QueueUtil>();
 
-  static TaskQueueUtil getInstance() {
-    if (_instance == null) {
-      _instance = TaskQueueUtil._();
+  static QueueUtil get(String key) {
+    if (_instance[key] == null) {
+      _instance[key] = QueueUtil._();
     }
-    return _instance;
+    return _instance[key];
   }
 
-  TaskQueueUtil._() {
+  QueueUtil._() {
     /// 初始化代码
   }
 
-  List<TaskInfo> taskList = [];
-  bool isTaskRunning = false;
+  List<_TaskInfo> _taskList = [];
+  bool _isTaskRunning = false;
+  int _mId = 0;
+  bool _isCancelQueue = false;
 
-  Future<TaskInfo> addTask(TaskInfo taskInfo) {
+  Future<_TaskInfo> addTask(Function doSomething) {
+    _isCancelQueue = false;
+    _mId++;
+    _TaskInfo taskInfo = _TaskInfo(_mId, doSomething);
+
     /// 创建future
-    Completer<TaskInfo> taskCompleter = Completer<TaskInfo>();
+    Completer<_TaskInfo> taskCompleter = Completer<_TaskInfo>();
 
     /// 创建当前任务stream
-    StreamController<TaskInfo> streamController = new StreamController();
+    StreamController<_TaskInfo> streamController = new StreamController();
     taskInfo.controller = streamController;
 
     /// 添加到任务队列
-    taskList.add(taskInfo);
+    _taskList.add(taskInfo);
 
     /// 当前任务的stream添加监听
-    streamController.stream.listen((TaskInfo completeTaskInfo) {
+    streamController.stream.listen((_TaskInfo completeTaskInfo) {
       if (completeTaskInfo.id == taskInfo.id) {
         taskCompleter.complete(completeTaskInfo);
         streamController.close();
@@ -56,47 +64,47 @@ class TaskQueueUtil {
     });
 
     /// 触发任务
-    doTask();
+    _doTask();
 
     return taskCompleter.future;
   }
 
-  doTask() async {
-    if (isTaskRunning) return;
-    if (taskList.isEmpty) return;
+  void cancelTask() {
+    _taskList = [];
+    _isCancelQueue = true;
+    _mId = 0;
+    _isTaskRunning = false;
+  }
+
+  _doTask() async {
+    if (_isCancelQueue) return;
+    if (_isTaskRunning) return;
+    if (_taskList.isEmpty) return;
 
     /// 取任务
-    TaskInfo taskInfo = taskList[0];
-    isTaskRunning = true;
+    _TaskInfo taskInfo = _taskList[0];
+    _isTaskRunning = true;
 
     /// 模拟执行任务
-    await Future.delayed(Duration(seconds: 2));
-    taskInfo.content += 'ed';
+    await taskInfo.doSomething?.call();
+
     taskInfo.controller.sink.add(taskInfo);
 
-
     /// 出队列
-    taskList.removeAt(0);
-    isTaskRunning = false;
+    _taskList.removeAt(0);
+    _isTaskRunning = false;
 
     /// 递归执行任务
-    doTask();
+    _doTask();
   }
-
 }
 
-
-class TaskInfo {
+class _TaskInfo {
   int id; // 任务唯一标识
-  String content;
-  StreamController<TaskInfo> controller;
+  Function doSomething;
+  StreamController<_TaskInfo> controller;
 
-  TaskInfo(this.id, this.content, {this.controller});
-
-  @override
-  String toString() {
-    return 'TaskInfo{id: $id, content: $content, controller: $controller}';
-  }
+  _TaskInfo(this.id, this.doSomething, {this.controller});
 }
 ```
 
@@ -104,27 +112,44 @@ class TaskInfo {
 
 ```dart
 main() {
-    TaskInfo runTask = new TaskInfo(1, 'run');
-    TaskInfo playTask = new TaskInfo(2, 'play');
-    TaskInfo swimTask = new TaskInfo(3, 'swim');
-    
-    task(runTask);
-    task(playTask);
-    task(swimTask);
+      /// 将任务添加到队列
+      print("加入队列-net, taskNo: 1");
+      QueueUtil.get("net").addTask(() {
+        return _doFuture("net", 1);
+      });
+      print("加入队列-net, taskNo: 2");
+      QueueUtil.get("net").addTask(() {
+        return _doFuture("net", 2);
+      });
+      print("加入队列-local, taskNo: 1");
+      QueueUtil.get("local").addTask(() {
+        return _doFuture("local", 1);
+      });
+      
+      
+      
+      /// 取消队列任务
+      /// QueueUtil.get("net").cancelTask();
 }
 
 
 
-task1() async {
-  TaskInfo taskInfo = await TaskQueueUtil.getInstance().addTask(runTask);
-  debugPrint('task${taskInfo.id}-result:$taskInfo');
-}
+  Future _doFuture(String queueName, int taskNo) {
+    return Future.delayed(Duration(seconds: 2), () {
+      print("任务完成  queueName: $queueName, taskNo: $taskNo");
+    });
+  }
 
 
-// 执行结果(每两秒打印)：
-// flutter: task1-result:TaskInfo{id: 1, content: runed, controller: Instance of '_AsyncStreamController<TaskInfo>'}
-// flutter: task2-result:TaskInfo{id: 2, content: played, controller: Instance of '_AsyncStreamController<TaskInfo>'}
-// flutter: task3-result:TaskInfo{id: 3, content: swimed, controller: Instance of '_AsyncStreamController<TaskInfo>'}
+// 执行结果：
+I/flutter (26436): 加入队列-net, taskNo: 1
+I/flutter (26436): 加入队列-net, taskNo: 2
+I/flutter (26436): 加入队列-local, taskNo: 1
+------------两秒后--------
+I/flutter (26436): 任务完成  queueName: net, taskNo: 1
+I/flutter (26436): 任务完成  queueName: local, taskNo: 1
+------------两秒后--------
+I/flutter (26436): 任务完成  queueName: net, taskNo: 2
 ```
 
 

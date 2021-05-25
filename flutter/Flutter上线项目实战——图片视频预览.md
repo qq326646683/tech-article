@@ -1,31 +1,28 @@
 # interactiveviewer_gallery
 [![pub package](https://img.shields.io/pub/v/interactiveviewer_gallery.svg)](https://pub.dartlang.org/packages/interactiveviewer_gallery)
 
-A flutter library to show picture and video preview gallery
-support
-1. two-finger gesture zoom
-2. double-click to zoom
-3. switch left and right
-4. gesture back: scale, transfer, opacity of background
-5. video auto paused when miss focus
+图片预览&视频预览&图片视频混合预览的容器UI
+1. 支持双指缩放
+2. 支持双击放大
+3. 支持左右切换图片
+4. 支持下拉手势返回, 伴随缩小、移动、透明度变化
+5. 支持视频失去焦点自动暂停
 
-## Preview
-[video for youtube](https://youtu.be/S-93Et_nYQs)
+## 预览
+[qiniu](http://file.jinxianyun.com/interactiveviewer_gallery_0_1_0.mp4)/[youtube](https://youtu.be/S-93Et_nYQs)
 
-[video for qiniu](http://file.jinxianyun.com/interactiveviewer_gallery_0_1_0.mp4)
 
 [apk download](http://file.jinxianyun.com/interactiveviewer_gallery_0_1_0.apk)
 
-## Setup
+## 安装
 
-because the library is base on InteractiveViewer so require flutter verion above or equal 1.20.0
+因为该库是在InteractiveViewer基础上实现的, 所以flutter版本不低于1.20.0
 ```dart
 interactiveviewer_gallery: ${last_version}
 ```
 
-## How to use
-
-1. Wrap Hero in your image gridview item:
+## 如何使用
+1. 九宫格图片页面中图片组件包裹Hero(用来跳转的承接动画)
 ```dart
 Hero(
     tag: source.url,
@@ -33,25 +30,24 @@ Hero(
 )
  ```
 
-2. gridview item's GestureDetector add jumping to interactiveviewer_gallery:
+2. 点击九宫格图片跳转到图片预览页面
 ```dart
-// DemoSourceEntity is your data model
-// itemBuilder is gallery page item
-void _openGallery(DemoSourceEntity source) {
-  Navigator.of(context).push(
+Navigator.of(context).push(
     HeroDialogRoute<void>(
-      // DisplayGesture is just debug, please remove it when use
       builder: (BuildContext context) => InteractiveviewerGallery<DemoSourceEntity>(
           sources: sourceList,
           initIndex: sourceList.indexOf(source),
+          // 定义自己的item
           itemBuilder: itemBuilder,
+          onPageChanged: (int pageIndex) {
+            print("nell-pageIndex:$pageIndex");
+          },
       ),
     ),
   );
-}
 ```
 
-3. edit itemBuilder: you can reference the [example/lib/main.dart](https://github.com/qq326646683/interactiveviewer_gallery/blob/main/example/lib/main.dart) then customize
+3. 定义自己的item (因为每个人的UI设计不一样, 所以这里需要自己实现item, 该库只是一个UI容器), 可以参考预览视频中的实现: [example/lib/main.dart](https://github.com/qq326646683/interactiveviewer_gallery/blob/main/example/lib/main.dart)
 
 ```dart
 Widget itemBuilder(BuildContext context, int index, bool isFocus) {
@@ -67,5 +63,5 @@ Widget itemBuilder(BuildContext context, int index, bool isFocus) {
 }
 ```
 
-## Other
-Comments and pr are welcome
+## 其他
+欢迎pr和讨论

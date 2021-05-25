@@ -1,10 +1,14 @@
+
 线上项目应用运行效果：
 http://file.jinxianyun.com/tencentplayer.MP4
 
 demo apk：
-http://file.jinxianyun.com/flutter_tencentplayer_0_8_0.apk
+http://file.jinxianyun.com/flutter_tencentplayer_0_11_0.apk
 
-![](https://user-gold-cdn.xitu.io/2020/5/15/172166bc281e3c7a?w=256&h=256&f=png&s=6135)
+# 0.Tip
+1. 必须真机
+2. android打release包必须加--no-shrink： flutter build apk --release --no-shrink
+3. 打包混淆配置参考[issue99](https://github.com/qq326646683/flutter_tencentplayer/issues/99#issuecomment-839378426)
 
 # 1.Setup
 ```
@@ -67,9 +71,9 @@ allprojects {
 
 //项目的info.plist文件上添加如下权限 
 <key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+  <dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
   </dict>
 ```
 
@@ -114,9 +118,9 @@ autoPlay | bool | true | 是否自动播放
 loop | bool | false | 是否循环播放
 headers | Map<String, String> |  | 请求头
 cachePath | String |  | 缓存路径(边播放边下载)
-progressInterval | int | 200 | 播放进度回调频率(毫秒)
+progressInterval | int | 1 | 播放进度回调频率(秒)
 startTime | int | 0 | 哪里开始播放(秒)
-auth | Map<String, dynamic> |  | 云点播视频源appId&fileId
+auth | Map<String, dynamic> |  | 云点播视频源appId&fileId&sign
 supportBackground | bool | false | 是否后台播放
 
 
@@ -139,6 +143,8 @@ netSpeed | int | 视频播放网速
 rate | double | 播放速度
 bitrateIndex | int | 视频清晰度
 orientation | int | 手机旋转角度(android only)
+degree | int | 本地file视频自带旋转属性
+eventCode | int | 事件监听[code](https://cloud.tencent.com/document/product/881/20216#.E4.BA.8B.E4.BB.B6.E7.9B.91.E5.90.AC)
 
 ### 4.<font color=#0000FF >Event</font> (播放器事件)
 

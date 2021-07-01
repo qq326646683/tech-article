@@ -15,6 +15,7 @@
 6. 直到taskList为空停止队列任务
 
 ## 三、具体实现
+>支持空安全版本 [戳我](https://github.com/qq326646683/flutter_vap/blob/main/lib/queue_util.dart)
 
 > QueueUtil.dart
 

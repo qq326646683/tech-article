@@ -19,6 +19,8 @@ List<Route> _mRoutes中。
 
 
 ## 3. 具体实现
+>支持空安全版本 [戳我](https://github.com/qq326646683/flutter_collection_demo/tree/main/lib/util/navigation)
+
 >main.dart
   
 ``` dart
@@ -269,14 +271,14 @@ class _ChatPageState extends State<ChatPage> with NavigationMixin<ChatPage> {
   
   @override
   void onBlur() {
-  	super.onBlur();
-  	// do something
+      super.onBlur();
+      // do something
   }
   
   @override
   void onFocus() {
-  	super.onFocus();
-  	// do something
+      super.onFocus();
+      // do something
   }
 }
   

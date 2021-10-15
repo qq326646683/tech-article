@@ -1,4 +1,6 @@
-###### [十五、Android实战——Cocos游戏容器搭建篇](https://github.com/qq326646683/tech-article/blob/master/android/Android实战——Cocos游戏容器搭建篇.md)
+###### [十七、Android实战——Cocos游戏容器通信篇](https://github.com/qq326646683/tech-article/blob/master/android/Android实战——Cocos游戏容器通信篇.md)
+
+###### [十六、Android实战——Cocos游戏容器搭建篇](https://github.com/qq326646683/tech-article/blob/master/android/Android实战——Cocos游戏容器搭建篇.md)
 
 ###### [十五、Android学习——VAP源码](https://github.com/qq326646683/tech-article/blob/master/android/Android学习——VAP源码.md)
 

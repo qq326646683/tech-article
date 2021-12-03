@@ -1,3 +1,5 @@
+###### [十八、Android实战——RecyclerView条目曝光埋点](https://github.com/qq326646683/tech-article/blob/master/android/Android实战——RecyclerView条目曝光埋点.md)
+
 ###### [十七、Android实战——Cocos游戏容器通信篇](https://github.com/qq326646683/tech-article/blob/master/android/Android实战——Cocos游戏容器通信篇.md)
 
 ###### [十六、Android实战——Cocos游戏容器搭建篇](https://github.com/qq326646683/tech-article/blob/master/android/Android实战——Cocos游戏容器搭建篇.md)

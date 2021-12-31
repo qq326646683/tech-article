@@ -1,3 +1,5 @@
+###### [十九、Android学习——Handler通信机制](https://github.com/qq326646683/tech-article/blob/master/android/Android学习——Handler通信机制.md)
+
 ###### [十八、Android实战——RecyclerView条目曝光埋点](https://github.com/qq326646683/tech-article/blob/master/android/Android实战——RecyclerView条目曝光埋点.md)
 
 ###### [十七、Android实战——Cocos游戏容器多进程通信](https://github.com/qq326646683/tech-article/blob/master/android/Android实战——Cocos游戏容器多进程通信.md)

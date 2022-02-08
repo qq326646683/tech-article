@@ -128,7 +128,7 @@ printf("*&array[2]: %d\n", *&array[2]); //3
 
 
 
-###### 七、函数指针及bi bao
+###### 七、函数指针
 
 ```c
 void test(int x, int y) {
